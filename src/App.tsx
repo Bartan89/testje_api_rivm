@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react"
 import logo from "./logo.svg"
 import Axios from "axios"
+import styles from "styled-components"
+import ReactTimeout from "react-timeout"
 import "./App.css"
-import { isRegExp } from "util"
+import Counter from "./styledcomponents/Counter"
 
 type Attributes = {
   Bevolkingsaantal: number
@@ -39,7 +41,7 @@ function App() {
 
   const [gemeentes, setGemeentes] = useState([])
   const [gemeentesFiltered, setGemeentesFiltered] = useState<string[]>([])
-  const [input, setInput] = useState("")
+  const [input, setInput] = useState("Amsterdam")
   const [showlist, setShowlist] = useState(false)
   const [completeData, setCompleteData] = useState<CompleteData[]>()
   const [foundRecord, setFoundRecord] = useState<CompleteData>()
@@ -107,6 +109,16 @@ function App() {
       }
     }
   }
+  const [counter, setcounter] = useState<number>(0)
+
+  console.log("****", foundRecord)
+
+  const [showMore, setShowMore] = useState<Boolean>(true)
+
+  function toggleShowMore() {
+    setShowMore(!showMore)
+    setcounter(0)
+  }
 
   function handleSearchbtn() {
     if (completeData !== undefined) {
@@ -115,24 +127,30 @@ function App() {
       })
       setFoundRecord(searched)
       setShowlist(!showlist)
+      setcounter(0)
     }
   }
 
-  console.log("****", foundRecord)
-
-  const [showMore, setShowMore] = useState<Boolean>(true)
-
-  function toggleShowMore() {
-    setShowMore(!showMore)
-  }
+  useEffect(() => {
+    if (foundRecord?.attributes.Overleden !== undefined) {
+      Array.from(Array(foundRecord?.attributes.Overleden)).map((x, i) => {
+        setTimeout(() => {
+          setcounter(counter + i)
+        }, 1000)
+      })
+    }
+  }, [showlist])
 
   return (
     <div className="main">
       <div className="searcharea">
-        <input placeholder="bijv: Amsterdam" value={input} onChange={handleInput} type="text" />
-        <button onClick={handleSearchbtn}>search</button>
+        <h1>Gemeente:</h1>
+        <input id="input" className="searchbox" placeholder="bijv: Amsterdam" value={input} onChange={handleInput} type="text" />
+        <button className="searchBTN" onClick={handleSearchbtn}>
+          search
+        </button>
 
-        <div style={{ alignContent: "center" }}>
+        <div className="dropdown">
           {showlist
             ? gemeentesFiltered.map((gemeente, i) => {
                 {
@@ -164,24 +182,8 @@ function App() {
       </div>
       {foundRecord ? (
         <div className="table">
-          <table>
-            <tr>
-              <th>Provincie:</th>
-              <td>{foundRecord?.attributes.Provincie}</td>
-            </tr>
-            <tr>
-              <th>Veiligheids regio:</th>
-              <td>{foundRecord?.attributes.Veiligheidsregio}</td>
-            </tr>
-            <tr>
-              <th>Ziekenhuisopnamen:</th>
-              <td>{foundRecord?.attributes.Ziekenhuisopnamen}</td>
-            </tr>
-            <tr>
-              <th>Overleden:</th>
-              <td>{foundRecord?.attributes.Overleden}</td>
-            </tr>
-          </table>
+          <h1>overleden:</h1>
+          <h2>{counter}</h2>
         </div>
       ) : (
         <div className="table"></div>
